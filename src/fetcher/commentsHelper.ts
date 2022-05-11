@@ -9,13 +9,18 @@ export function getComment({
   comments: RestEndpointMethodTypes['issues']['listComments']['response']['data']
   pattern: string
 }) {
-  return comments?.find(({ body }) => body.includes(pattern))
+  return comments?.find(
+    ({
+      body,
+    }: RestEndpointMethodTypes['issues']['getComment']['response']['data']) =>
+      body?.includes(pattern)
+  )
 }
 
 export function getUrlFromComment(
-  comment,
+  comment: RestEndpointMethodTypes['issues']['getComment']['response']['data'],
   params: { index?: number } = {}
-): string {
+) {
   const elementIndex = (params.index || 1) - 1
   return comment?.body?.match(urlRegex)?.[elementIndex]
 }

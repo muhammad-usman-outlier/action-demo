@@ -1,8 +1,7 @@
 import { context, getOctokit } from '@actions/github'
-import { getInput, setFailed, setOutput } from '@actions/core'
 import { getComment, getUrlFromComment } from './commentsHelper'
 import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types'
-import { getPlatformPattern, validatePlatform } from './platform'
+import { getToken } from '../constants'
 
 async function fetchComments({
   client,
@@ -22,47 +21,44 @@ async function fetchComments({
   }
 }
 
-async function execute() {
-  const gitHubToken = getInput('token')
-  const platform = validatePlatform(getInput('platform'))
-  const patterns = getInput('pattern').split('\n')
-  const urlIndex = Number(getInput('index')) || 1
+export async function extractURLs() {
+  const gitHubToken = getToken
+  const patterns = 'Follow its progress at'
+  const previewURLIndex = 2
+  const progressURLIndex = 3
 
   const client = getOctokit(gitHubToken)
   const issueNumber = context.payload.pull_request?.number
 
   let settings = {
     pattern: patterns?.[0],
-    index: urlIndex,
+    preview_index: previewURLIndex,
+    progress_index: progressURLIndex,
   }
-  // overwrite pattern and index when `platform` is provided
-  if (platform) {
-    console.info(
-      'Platform param is provided. Pattern and index params are ignored.'
-    )
-    settings = getPlatformPattern(platform)
-  }
-
   const comments = await fetchComments({ client, issueNumber })
   const comment = getComment({ comments, pattern: settings.pattern })
 
   if (comment) {
     console.info('Comment found')
-    const url = getUrlFromComment(comment, { index: settings.index })
-    console.info('Extracted URL', url)
-    setOutput('comment_url', url)
-    setOutput('found_url', !!url)
-    return
+    const previewURL = getUrlFromComment(comment, {
+      index: settings.preview_index,
+    })
+    const progressURL = getUrlFromComment(comment, {
+      index: settings.progress_index,
+    })
+    console.info('Extracted Preview URL', previewURL)
+    console.info('Extracted Progress URL', progressURL)
+    return { preview: previewURL, progress: progressURL }
   }
-  setOutput('found_url', false)
+  console.info('found_url', false)
 }
 
-async function run() {
-  try {
-    await execute()
-  } catch (error) {
-    setFailed(`[action-get-comment-url] ${error.message}`)
-  }
+export function serviceIdExtractor(
+  url: any,
+  regexPattern: string,
+  regexFlags: string
+) {
+  const regex = new RegExp(regexPattern, regexFlags ?? '')
+  const matches = url.match(regex)
+  return matches[0]
 }
-
-run()
