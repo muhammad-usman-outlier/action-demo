@@ -1,18 +1,19 @@
+/* eslint-disable import/no-unresolved */
 import * as Core from '@actions/core'
 import * as Github from '@actions/github'
-import { PullRequestEvent } from '@octokit/webhooks-definitions/schema'
-import { GraphQLClient } from 'graphql-request'
-import { getToken } from '../constants'
+import {PullRequestEvent} from '@octokit/webhooks-definitions/schema'
+import {GraphQLClient} from 'graphql-request'
+import {getToken} from '../constants'
 
-import { Deploy as RenderDeploy, getSdk } from './generated/sdk'
-import { wait } from './wait'
+import {Deploy as RenderDeploy, getSdk} from './generated/sdk'
+import {wait} from './wait'
 
 /*******************************************
  *** Constants
  ******************************************/
-type Context = { sha: string; ref: string; pr?: number }
+type Context = {sha: string; ref: string; pr?: number}
 
-type GitHubDeploy = { id: number; state?: DeploymentState }
+type GitHubDeploy = {id: number; state?: DeploymentState}
 
 type Deployment = {
   render: RenderDeploy
@@ -34,7 +35,7 @@ type DeploymentState =
 const client = new GraphQLClient('https://api.render.com/graphql')
 const sdk = getSdk(client)
 const octokit = Github.getOctokit(getToken, {
-  previews: ['flash', 'ant-man'],
+  previews: ['flash', 'ant-man']
 })
 
 /*******************************************
@@ -43,7 +44,7 @@ const octokit = Github.getOctokit(getToken, {
 export async function logIn(email: string, password: string): Promise<void> {
   Core.info('Signing in...')
 
-  const { signIn } = await sdk.SignIn({ email, password })
+  const {signIn} = await sdk.SignIn({email, password})
 
   if (!signIn?.idToken) {
     throw new Error('Sign-in failed!')
@@ -52,16 +53,16 @@ export async function logIn(email: string, password: string): Promise<void> {
 }
 
 export async function findServer(
-  { pr }: Context,
+  {pr}: Context,
   serverId: string
 ): Promise<string> {
   if (pr) {
     Core.info('Running in Pull Request: Listing Pull Request Servers...')
 
     const number = pr.toString()
-    const { pullRequestServers } = await sdk.PullRequestServers({ serverId })
+    const {pullRequestServers} = await sdk.PullRequestServers({serverId})
     const server = pullRequestServers?.find(
-      (s) => s?.pullRequest.number === number
+      s => s?.pullRequest.number === number
     )
 
     if (server && server.server) {
@@ -74,13 +75,13 @@ export async function findServer(
 }
 
 export function getContext(): Context {
-  const { eventName, payload } = Github.context
+  const {eventName, payload} = Github.context
   switch (eventName) {
     case 'pull_request':
       const {
-        pull_request: { number, head },
+        pull_request: {number, head}
       } = payload as PullRequestEvent
-      return { pr: number, ...head }
+      return {pr: number, ...head}
     case 'push':
       return Github.context
     default:
@@ -98,9 +99,9 @@ export async function findDeploy(
   if (retries === 0) {
     Core.info(`Looking deployments for ${serverId}...`)
   }
-  const { deploys } = await sdk.Deploys({ serverId })
+  const {deploys} = await sdk.Deploys({serverId})
   const deploy = deploys?.find(
-    (d) =>
+    d =>
       d.commitId === context.sha &&
       d.branch === context.ref.replace('refs/heads/', '')
   ) as RenderDeploy
@@ -116,7 +117,7 @@ export async function findDeploy(
 }
 
 export async function getDeploy(id: string): Promise<RenderDeploy> {
-  const { deploy } = await sdk.Deploy({ id })
+  const {deploy} = await sdk.Deploy({id})
   if (!deploy) {
     throw new Error(`Deployment ${id} disappeared! ❌`)
   }
@@ -124,7 +125,7 @@ export async function getDeploy(id: string): Promise<RenderDeploy> {
 }
 
 export async function waitForDeploy(deployment: Deployment): Promise<void> {
-  const { render } = deployment
+  const {render} = deployment
   switch (render?.status) {
     case 1: // Running
       if (await updateDeployment(deployment, 'in_progress')) {
@@ -133,7 +134,7 @@ export async function waitForDeploy(deployment: Deployment): Promise<void> {
       await wait(~~Core.getInput('wait'))
       return waitForDeploy({
         ...deployment,
-        render: await getDeploy(render.id),
+        render: await getDeploy(render.id)
       })
     case 2: // Live
     case 3: // Succeeded
@@ -156,11 +157,11 @@ export async function waitForDeploy(deployment: Deployment): Promise<void> {
 
 export async function createDeployment(
   context: Context,
-  { server }: RenderDeploy
+  {server}: RenderDeploy
 ): Promise<GitHubDeploy> {
   Core.info(`Creating ${server.name} GitHub deployment`)
   const state: DeploymentState = 'pending'
-  const { data } = await octokit.repos.createDeployment({
+  const {data} = await octokit.repos.createDeployment({
     ...Github.context.repo,
     ref: context.ref,
     description: server.name,
@@ -169,13 +170,13 @@ export async function createDeployment(
     transient_environment: !!context.pr,
     auto_merge: false,
     required_contexts: [],
-    state,
+    state
   })
-  return { ...data, state } as GitHubDeploy
+  return {...data, state} as GitHubDeploy
 }
 
 export async function updateDeployment(
-  { render, github }: Deployment,
+  {render, github}: Deployment,
   state: DeploymentState
 ): Promise<boolean> {
   if (github.state !== state) {
@@ -185,7 +186,7 @@ export async function updateDeployment(
       log_url: getDeployUrl(render),
       environment_url: render.server.url,
       description: state,
-      state,
+      state
     })
     github.state = state
     return true

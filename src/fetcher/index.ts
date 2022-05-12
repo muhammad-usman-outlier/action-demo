@@ -1,18 +1,27 @@
-import { context, getOctokit } from '@actions/github'
-import { getComment, getUrlFromComment } from './commentsHelper'
-import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types'
-import { getToken } from '../constants'
+import {context, getOctokit} from '@actions/github'
+import {getComment, getUrlFromComment} from './commentsHelper'
+import {RestEndpointMethodTypes} from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types'
+import {
+  commentPattern,
+  getToken,
+  previewURLIndex,
+  progressURLIndex
+} from '../constants'
+// interface FetchCommentsProps {
+//   client: Array<Object|String>;
+//   issueNumber: string;
+// }
 
 async function fetchComments({
   client,
-  issueNumber,
-}): Promise<
+  issueNumber
+}: any): Promise<
   RestEndpointMethodTypes['issues']['listComments']['response']['data']
 > {
   try {
-    const { data: comments } = await client.issues.listComments({
+    const {data: comments} = await client?.issues?.listComments({
       ...context.repo,
-      issue_number: issueNumber,
+      issue_number: issueNumber
     })
     return comments
   } catch (error) {
@@ -23,32 +32,29 @@ async function fetchComments({
 
 export async function extractURLs() {
   const gitHubToken = getToken
-  const patterns = 'Follow its progress at'
-  const previewURLIndex = 2
-  const progressURLIndex = 3
 
   const client = getOctokit(gitHubToken)
   const issueNumber = context.payload.pull_request?.number
 
   let settings = {
-    pattern: patterns?.[0],
+    pattern: commentPattern?.[0],
     preview_index: previewURLIndex,
-    progress_index: progressURLIndex,
+    progress_index: progressURLIndex
   }
-  const comments = await fetchComments({ client, issueNumber })
-  const comment = getComment({ comments, pattern: settings.pattern })
+  const comments = await fetchComments({client, issueNumber})
+  const comment = getComment({comments, pattern: settings.pattern})
 
   if (comment) {
     console.info('Comment found')
     const previewURL = getUrlFromComment(comment, {
-      index: settings.preview_index,
+      index: settings.preview_index
     })
     const progressURL = getUrlFromComment(comment, {
-      index: settings.progress_index,
+      index: settings.progress_index
     })
     console.info('Extracted Preview URL', previewURL)
     console.info('Extracted Progress URL', progressURL)
-    return { preview: previewURL, progress: progressURL }
+    return {preview: previewURL, progress: progressURL}
   }
   console.info('found_url', false)
 }

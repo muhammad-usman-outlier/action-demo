@@ -1,22 +1,54 @@
-# GitHub Render Deploy and Dispatch Action
+# Fetch and verify Render deploy 
 
-This action fetches Render deploy links from PR, awaits their deploy and 
-dispatches the preview to a given repo using repository_dispatch.
+This action fetches Render deploy links from PR and verifies for a successful deployment of the deloyment preview.
 
 ## Inputs
 
-## `who-to-greet`
+## `token`
 
-**Required** The name of the person to greet. Default `"World"`.
+**Required** Github Token.
+
+## `render-email`
+
+**Required** Email for Render Dashboard.
+
+## `render-password`
+
+**Required** Password for Render Dashboard.
+ 
+## `sleep`
+
+Sleep time between the render deployment success and setting the Github deployment as successful.
+ `"0"`.
+## `retries`
+
+**Required** Maximum number of retries trying to find the deployment. Note: Retries will be attempted every 5 seconds.
+ `"50"`.
+## `wait`
+
+**Required** Sleep time between retries to find Render deployments statuses.
+ `"8000"`.
 
 ## Outputs
 
-## `time`
+## `preview-url`
 
-The time we greeted you.
+The successfully deployed preview link.
 
 ## Example usage
 
-uses: actions/hello-world-javascript-action@v1.1
-with:
-  who-to-greet: 'Mona the Octocat'
+```yaml
+name: Fetch and verify Render deploy
+on: [pull_request]:
+jobs:
+  deploy:
+    name: Wait for Render Deployment
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Wait for Render Deployment
+        uses: actions/action-demo@v1.1
+        with:
+          token:
+          render-email:
+          render-password:
+  ```
