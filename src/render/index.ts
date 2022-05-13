@@ -58,6 +58,7 @@ export async function findServer(
 ): Promise<string> {
   if (pr) {
     Core.info('Running in Pull Request: Listing Pull Request Servers...')
+    Core.info(`serverId: ${serverId}`)
 
     const number = pr.toString()
     const {pullRequestServers} = await sdk.PullRequestServers({serverId})
