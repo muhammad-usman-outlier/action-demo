@@ -14,7 +14,6 @@ import {
 async function run(): Promise<void> {
   try {
     const [serviceId, preview]: any = await extractURLs()
-    Core.info(`ServerID: ${serviceId}  preview: ${preview}`)
     Core.info('Starting Render Wait Action')
     await logIn(getEmail, getPassword)
     const context = getContext()

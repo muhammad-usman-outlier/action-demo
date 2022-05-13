@@ -1,8 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable import/no-unresolved */
-/* eslint-disable no-console */
-/* eslint-disable prefer-template */
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
 import {context, getOctokit} from '@actions/github'
 import {getComment, getUrlFromComment} from './commentsHelper'
 import {RestEndpointMethodTypes} from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types'
@@ -15,25 +11,20 @@ import {
   regexPattern
 } from '../constants'
 
-interface FetchCommentsProps {
-  client: any
-  issueNumber: number | undefined
-}
-
-async function fetchComments({
-  client,
-  issueNumber
-}: FetchCommentsProps): Promise<
+async function fetchComments(
+  issueNumber: any
+): Promise<
   RestEndpointMethodTypes['issues']['listComments']['response']['data']
 > {
   try {
+    const client: any = getOctokit(getToken)
     const {data: comments} = await client.issues.listComments({
       ...context.repo,
       issue_number: issueNumber
     })
     return comments
   } catch (error) {
-    console.warn('No issues found for id: ' + issueNumber)
+    console.warn(`No issues found for id: ${issueNumber}`)
     return []
   }
 }
@@ -41,9 +32,6 @@ async function fetchComments({
 type ExtractURLs = (string | undefined)[] | void
 
 export async function extractURLs(): Promise<ExtractURLs> {
-  const gitHubToken = getToken
-
-  const client = getOctokit(gitHubToken)
   const issueNumber = context.payload.pull_request?.number
 
   const settings = {
@@ -51,7 +39,7 @@ export async function extractURLs(): Promise<ExtractURLs> {
     preview_index: previewURLIndex,
     progress_index: progressURLIndex
   }
-  const comments = await fetchComments({client, issueNumber})
+  const comments = await fetchComments(issueNumber)
   const comment = getComment({comments, pattern: settings.pattern})
 
   if (comment) {
@@ -66,7 +54,6 @@ export async function extractURLs(): Promise<ExtractURLs> {
     const matches: any = progressURL?.match(regex)
     const serviceId = `srv-${matches[0]}`
     console.info('Extracted Preview URL', previewURL)
-    console.info('Extracted Progress URL', progressURL)
     console.info('Extracted Service ID', serviceId)
     return [serviceId, previewURL]
   }
