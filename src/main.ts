@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Core from '@actions/core'
-import {extractURLs, serviceIdExtractor} from './fetcher'
-import {getEmail, getPassword, regexFlags, regexPattern} from './constants'
+import {extractURLs} from './fetcher'
+import {getEmail, getPassword} from './constants'
 import {
   createDeployment,
   findDeploy,
@@ -12,8 +13,8 @@ import {
 
 async function run(): Promise<void> {
   try {
-    const {preview, progress}: any = extractURLs()
-    const serviceId = serviceIdExtractor(progress, regexPattern, regexFlags)
+    const {serviceId, preview}: any = extractURLs()
+    Core.info(`ServerID: ${serviceId}  preview: ${preview}`)
     Core.info('Starting Render Wait Action')
     await logIn(getEmail, getPassword)
     const context = getContext()
