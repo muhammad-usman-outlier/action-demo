@@ -36,7 +36,7 @@ const Core = __importStar(__webpack_require__(2186));
 exports.getToken = Core.getInput('token');
 exports.getEmail = Core.getInput('render-email');
 exports.getPassword = Core.getInput('render-password');
-exports.regexPattern = '(?<=dashboard.render.com/static/srv-)[sS][^!.]*';
+exports.regexPattern = /(?<=dashboard.render.com\/static\/srv-)[\s\S][^!.]*/;
 exports.regexFlags = 'gim';
 exports.commentPattern = 'Follow its progress at';
 exports.previewURLIndex = 2;
@@ -82,19 +82,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.serviceIdExtractor = exports.extractURLs = void 0;
+exports.extractURLs = void 0;
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable import/no-unresolved */
+/* eslint-disable no-console */
+/* eslint-disable prefer-template */
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
 const github_1 = __webpack_require__(5438);
 const commentsHelper_1 = __webpack_require__(4810);
 const constants_1 = __webpack_require__(5105);
-// interface FetchCommentsProps {
-//   client: Array<Object|String>;
-//   issueNumber: string;
-// }
 function fetchComments({ client, issueNumber }) {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { data: comments } = yield ((_a = client === null || client === void 0 ? void 0 : client.issues) === null || _a === void 0 ? void 0 : _a.listComments(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: issueNumber })));
+            const { data: comments } = yield client.issues.listComments(Object.assign(Object.assign({}, github_1.context.repo), { issue_number: issueNumber }));
             return comments;
         }
         catch (error) {
@@ -109,7 +109,7 @@ function extractURLs() {
         const gitHubToken = constants_1.getToken;
         const client = (0, github_1.getOctokit)(gitHubToken);
         const issueNumber = (_a = github_1.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number;
-        let settings = {
+        const settings = {
             pattern: constants_1.commentPattern === null || constants_1.commentPattern === void 0 ? void 0 : constants_1.commentPattern[0],
             preview_index: constants_1.previewURLIndex,
             progress_index: constants_1.progressURLIndex
@@ -124,20 +124,17 @@ function extractURLs() {
             const progressURL = (0, commentsHelper_1.getUrlFromComment)(comment, {
                 index: settings.progress_index
             });
+            const regex = new RegExp(constants_1.regexPattern, constants_1.regexFlags !== null && constants_1.regexFlags !== void 0 ? constants_1.regexFlags : '');
+            const matches = progressURL === null || progressURL === void 0 ? void 0 : progressURL.match(regex);
             console.info('Extracted Preview URL', previewURL);
             console.info('Extracted Progress URL', progressURL);
-            return { preview: previewURL, progress: progressURL };
+            console.info('Extracted Service ID', matches[0]);
+            return { serviceId: matches[0], previw: previewURL };
         }
         console.info('found_url', false);
     });
 }
 exports.extractURLs = extractURLs;
-function serviceIdExtractor(url, regexPattern, regexFlags) {
-    const regex = new RegExp(regexPattern, regexFlags !== null && regexFlags !== void 0 ? regexFlags : '');
-    const matches = url.match(regex);
-    return matches[0];
-}
-exports.serviceIdExtractor = serviceIdExtractor;
 
 
 /***/ }),
@@ -180,6 +177,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const Core = __importStar(__webpack_require__(2186));
 const fetcher_1 = __webpack_require__(8001);
 const constants_1 = __webpack_require__(5105);
@@ -187,8 +185,7 @@ const render_1 = __webpack_require__(1288);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { preview, progress } = (0, fetcher_1.extractURLs)();
-            const serviceId = (0, fetcher_1.serviceIdExtractor)(progress, constants_1.regexPattern, constants_1.regexFlags);
+            const { serviceId, preview } = (0, fetcher_1.extractURLs)();
             Core.info('Starting Render Wait Action');
             yield (0, render_1.logIn)(constants_1.getEmail, constants_1.getPassword);
             const context = (0, render_1.getContext)();
@@ -440,6 +437,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.updateDeployment = exports.createDeployment = exports.waitForDeploy = exports.getDeploy = exports.findDeploy = exports.getContext = exports.findServer = exports.logIn = void 0;
+/* eslint-disable import/no-unresolved */
 const Core = __importStar(__webpack_require__(2186));
 const Github = __importStar(__webpack_require__(5438));
 const graphql_request_1 = __webpack_require__(2476);
