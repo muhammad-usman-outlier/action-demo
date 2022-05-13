@@ -54,10 +54,12 @@ export async function logIn(email: string, password: string): Promise<void> {
 
 export async function findServer(
   {pr}: Context,
-  serverId: string
+  serviceId: string
 ): Promise<string> {
   if (pr) {
     Core.info('Running in Pull Request: Listing Pull Request Servers...')
+    Core.info(`serverId: ${serviceId}`)
+    const serverId = serviceId
 
     const number = pr.toString()
     const {pullRequestServers} = await sdk.PullRequestServers({serverId})
@@ -71,7 +73,7 @@ export async function findServer(
     Core.info('No Pull Request Servers found. Using regular deployment')
   }
 
-  return serverId
+  return serviceId
 }
 
 export function getContext(): Context {
