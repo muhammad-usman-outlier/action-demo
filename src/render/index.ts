@@ -1,11 +1,10 @@
-/* eslint-disable import/no-unresolved */
 import * as Core from '@actions/core'
 import * as Github from '@actions/github'
 import {PullRequestEvent} from '@octokit/webhooks-definitions/schema'
 import {GraphQLClient} from 'graphql-request'
 import {getToken} from '../constants'
 
-import {Deploy as RenderDeploy, getSdk} from './generated/sdk'
+import {Deploy as RenderDeploy, getSdk} from '../generated/sdk'
 import {wait} from './wait'
 
 /*******************************************
