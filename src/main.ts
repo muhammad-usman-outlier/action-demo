@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Core from '@actions/core'
 import {extractURLs, serviceIdExtractor} from './fetcher'
 import {getEmail, getPassword, regexFlags, regexPattern} from './constants'
@@ -13,7 +14,11 @@ import {
 async function run(): Promise<void> {
   try {
     const {preview, progress}: any = extractURLs()
-    const serviceId = serviceIdExtractor(progress, regexPattern, regexFlags)
+    const serviceId = serviceIdExtractor({
+      url: progress,
+      regexPattern,
+      regexFlags
+    })
     Core.info('Starting Render Wait Action')
     await logIn(getEmail, getPassword)
     const context = getContext()

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/no-unresolved */
 import * as Core from '@actions/core'
 import * as Github from '@actions/github'
@@ -54,7 +55,7 @@ export async function logIn(email: string, password: string): Promise<void> {
 
 export async function findServer(
   {pr}: Context,
-  serverId: string
+  serverId: any
 ): Promise<string> {
   if (pr) {
     Core.info('Running in Pull Request: Listing Pull Request Servers...')
