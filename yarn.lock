@@ -1216,15 +1216,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*":
-  version "17.0.32"
-  resolved "https://registry.npmjs.org/@types/node/-/node-17.0.32.tgz"
-  integrity sha512-eAIcfAvhf/BkHcf4pkLJ7ECpBAhh9kcxRBpip9cTiO+hf+aJrsxYxBeS6OXvOd9WqNAJmavXVpZvY1rBjNsXmw==
-
-"@types/node@^14.14.41":
-  version "14.18.17"
-  resolved "https://registry.npmjs.org/@types/node/-/node-14.18.17.tgz"
-  integrity sha512-oajWz4kOajqpKJMPgnCvBajPq8QAvl2xIWoFjlAJPKGu6n7pjov5SxGE45a+0RxHDoo4ycOMoZw1SCOWtDERbw==
+"@types/node@*", "@types/node@^18.7.21":
+  version "18.7.21"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.7.21.tgz#63ee6688070e456325b6748dc492a7b948593871"
+  integrity sha512-rLFzK5bhM0YPyCoTC8bolBjMk7bwnZ8qeZUBslBfjZQou2ssJdWslx9CZ8DGM+Dx7QXQiiTVZ/6QO6kwtHkZCA==
 
 "@types/parse-json@^4.0.0":
   version "4.0.0"
